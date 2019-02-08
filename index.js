@@ -9,49 +9,47 @@ const Promise = require('promise')
 const request = require('request')
 bot.on('message', (msg) => {
     // console.log(msg) 
-    for(let i = 0; i < config.owner_username.length; i++){
-        if(msg.from.username != config.owner_username[i]){
-            bot.sendMessage(msg.chat.id, '<b> \u26A0 DANGER !!! \u26A0 </b> \n Anda bukan owner.', {parse_mode: "HTML"})
-        }else{
-            let searchCommand = new Promise((resolve,reject)=>{
-                for (let i = 0; i < config.command.length; i++) {
-                    var command = config.command[i]
-                    if(msg.text.toString() == command){
-                        resolve(command)
-                    }
+    if(config.owner_username.includes(msg.from.username)){
+        let searchCommand = new Promise((resolve,reject)=>{
+            for (let i = 0; i < config.command.length; i++) {
+                var command = config.command[i]
+                if(msg.text.toString() == command){
+                    resolve(command)
                 }
-            })
+            }
+        })
+        
+        searchCommand.then((perintah)=>{
+            if(perintah != ''){
+                if (perintah == '/start') {
+                    bot.sendMessage(msg.chat.id, 'Selamat datang '+msg.from.first_name+' '+msg.from.last_name)
+                }
+                if (perintah == '/monitor') {
+                    let list_server = []
+                    let collectServer = new Promise((resolve,reject)=>{
+                        for (let i = 0; i < config.server.length; i++) {
+                            list_server.push([{text:config.server[i].name, callback_data:config.server[i].slug}])                        
+                        }
+                        resolve('done')
+                    })
+                    
+                    collectServer.then((done)=>{
+                        if(done){
+                            var options = {
+                                reply_markup: JSON.stringify({
+                                  inline_keyboard: list_server
+                                })
+                            }
+                            bot.sendMessage(msg.chat.id, 'Silahkan pilih server : ',options)
+                        }
+                    })
+                }
+            }
             
-            searchCommand.then((perintah)=>{
-                if(perintah != ''){
-                    if (perintah == '/start') {
-                        bot.sendMessage(msg.chat.id, 'Selamat datang '+msg.from.first_name+' '+msg.from.last_name)
-                    }
-                    if (perintah == '/monitor') {
-                        let list_server = []
-                        let collectServer = new Promise((resolve,reject)=>{
-                            for (let i = 0; i < config.server.length; i++) {
-                                list_server.push([{text:config.server[i].name, callback_data:config.server[i].slug}])                        
-                            }
-                            resolve('done')
-                        })
-                        
-                        collectServer.then((done)=>{
-                            if(done){
-                                var options = {
-                                    reply_markup: JSON.stringify({
-                                      inline_keyboard: list_server
-                                    })
-                                }
-                                bot.sendMessage(msg.chat.id, 'Silahkan pilih server : ',options)
-                            }
-                        })
-                    }
-                }
-                
-            })
-        }
-    } 
+        })
+    }else{
+        bot.sendMessage(msg.chat.id, '<b> \u26A0 DANGER !!! \u26A0 </b> \n Anda bukan owner.', {parse_mode: "HTML"}) 
+    }
 })
 
 bot.on('callback_query', function onCallbackQuery(server_choosen) {
