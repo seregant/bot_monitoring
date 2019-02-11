@@ -11,22 +11,23 @@ const interval = config.poll_interval, interval_in_ms = interval * 60 * 1000
 const cpu_thershold = config.poll_CPU_thershold
 bot.on('message', (msg) => {
     // console.log(msg) 
-    if(config.owner_username.includes(msg.from.username)){
+    if(config.owner_username.includes(msg.from.username)|| config.group_chat_id == msg.chat.id){
         let searchCommand = new Promise((resolve,reject)=>{
             for (let i = 0; i < config.command.length; i++) {
                 var command = config.command[i]
-                if(msg.text.toString() == command){
-                    resolve(command)
+                if(msg.text.toString() == command || msg.text.toString() == command+config.bot_username){
+                    resolve(command+config.bot_username)
                 }
             }
         })
         
         searchCommand.then((perintah)=>{
+            console.log(perintah)
             if(perintah != ''){
-                if (perintah == '/start') {
+                if (perintah =='/start'+config.bot_username) {
                     bot.sendMessage(msg.chat.id, 'Selamat datang '+msg.from.first_name+' '+msg.from.last_name + '\n Daftar Command : \n - /startpoll : Memulai poller monitoring \n - /monitor : Menampilkan penggunaan resource')
                 }
-                if (perintah == '/monitor') {
+                if (perintah == '/monitor'+config.bot_username) {
                     let list_server = []
                     let collectServer = new Promise((resolve,reject)=>{
                         for (let i = 0; i < config.server.length; i++) {
@@ -46,7 +47,7 @@ bot.on('message', (msg) => {
                         }
                     })
                 }
-                if (perintah=='/startpoll') {
+                if (perintah == '/startpoll'+config.bot_username) {
                     bot.sendMessage(msg.chat.id,"Poller monitoring dijalankan!")
                     // let a=1
                     setInterval(function(){
