@@ -8,7 +8,7 @@ const bot = new TelegramBot(token, {polling: true})
 const Promise = require('promise')
 const request = require('request')
 const interval = config.poll_interval, interval_in_ms = interval * 60 * 1000
-const thershold = 0
+const cpu_thershold = config.poll_CPU_thershold
 bot.on('message', (msg) => {
     // console.log(msg) 
     if(config.owner_username.includes(msg.from.username)){
@@ -24,7 +24,7 @@ bot.on('message', (msg) => {
         searchCommand.then((perintah)=>{
             if(perintah != ''){
                 if (perintah == '/start') {
-                    bot.sendMessage(msg.chat.id, 'Selamat datang '+msg.from.first_name+' '+msg.from.last_name)
+                    bot.sendMessage(msg.chat.id, 'Selamat datang '+msg.from.first_name+' '+msg.from.last_name + '\n Daftar Command : \n - /startpoll : Memulai poller monitoring \n - /monitor : Menampilkan penggunaan resource')
                 }
                 if (perintah == '/monitor') {
                     let list_server = []
@@ -47,7 +47,7 @@ bot.on('message', (msg) => {
                     })
                 }
                 if (perintah=='/startpoll') {
-                    bot.sendMessage(msg.chat.id,"Monitoring poller started")
+                    bot.sendMessage(msg.chat.id,"Poller monitoring dijalankan!")
                     // let a=1
                     setInterval(function(){
                         // console.log('Polling'+a)
@@ -66,8 +66,8 @@ bot.on('message', (msg) => {
                             })
 
                             poll.then((data)=>{
-                                if (data.cpu_usage2 > thershold) {
-                                   bot.sendMessage(msg.chat.id, '\u26A0 WARNING!! \u26A0 \n SERVER '+data.srv_name+ ' CPU usage is more than '+thershold+'% \n Current usage is '+data.cpu_usage,{parse_mode: "HTML"})
+                                if (data.cpu_usage2 > cpu_thershold) {
+                                   bot.sendMessage(msg.chat.id, '\u26A0 WARNING!! \u26A0 \n Penggunaan CPU server '+data.srv_name+ ' lebih dari '+thershold+'% \n Penggunaan saat ini : '+data.cpu_usage,{parse_mode: "HTML"})
                                 }
                             })
                         }
