@@ -7,7 +7,7 @@ const token = config.bot_token
 const bot = new TelegramBot(token, {polling: true})
 const Promise = require('promise')
 const request = require('request')
-const interval = 5000, interval_in_ms = interval * 60 * 1000
+const interval = config.poll_interval, interval_in_ms = interval * 60 * 1000
 const thershold = 0
 bot.on('message', (msg) => {
     // console.log(msg) 
@@ -48,9 +48,9 @@ bot.on('message', (msg) => {
                 }
                 if (perintah=='/startpoll') {
                     bot.sendMessage(msg.chat.id,"Monitoring poller started")
-                    let a=1
+                    // let a=1
                     setInterval(function(){
-                        console.log('Polling'+a)
+                        // console.log('Polling'+a)
                         for (i=0; i < config.server.length; i++){
                             let poll = new Promise ((resolve, reject)=>{
                                 request({
@@ -71,8 +71,8 @@ bot.on('message', (msg) => {
                                 }
                             })
                         }
-                        a++
-                    }, interval)
+                        // a++
+                    }, interval_in_ms)
                 }
             }
             
