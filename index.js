@@ -8,7 +8,7 @@ const bot = new TelegramBot(token, {polling: true})
 const Promise = require('promise')
 const request = require('request')
 const interval = 5000, interval_in_ms = interval * 60 * 1000
-const thershold = 90
+const thershold = 0
 bot.on('message', (msg) => {
     // console.log(msg) 
     if(config.owner_username.includes(msg.from.username)){
@@ -45,6 +45,34 @@ bot.on('message', (msg) => {
                             bot.sendMessage(msg.chat.id, 'Silahkan pilih server : ',options)
                         }
                     })
+                }
+                if (perintah=='/startpoll') {
+                    bot.sendMessage(msg.chat.id,"Monitoring poller started")
+                    let a=1
+                    setInterval(function(){
+                        console.log('Polling'+a)
+                        for (i=0; i < config.server.length; i++){
+                            let poll = new Promise ((resolve, reject)=>{
+                                request({
+                                     url:'http://'+config.server[i].host+':'+config.server[i].port+'/sysinfo',
+                                    headers:{
+                                        'Authorization': 'Bearer '+ config.server_key
+                                    }
+                                },(err, res, body)=>{
+                                    var result = JSON.parse(body)
+                                    result = result.data
+                                    resolve(result)
+                                })
+                            })
+
+                            poll.then((data)=>{
+                                if (data.cpu_usage2 > thershold) {
+                                   bot.sendMessage(msg.chat.id, '\u26A0 WARNING!! \u26A0 \n SERVER '+data.srv_name+ ' CPU usage is more than '+thershold+'% \n Current usage is '+data.cpu_usage,{parse_mode: "HTML"})
+                                }
+                            })
+                        }
+                        a++
+                    }, interval)
                 }
             }
             
@@ -97,12 +125,6 @@ function monitorSrv(server,bot,server_choosen){
             bot.editMessageText(data, opts);
         })
 }
-
-setInterval(function(){
-    for (i=0; i < config.server.length; i++){
-        console.log(config.server[i].name)
-    }
-}, interval)
 
 app.use(bodyParser.json())
 console.log('Telegram Bot server is running')
