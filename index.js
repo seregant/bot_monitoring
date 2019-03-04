@@ -49,9 +49,9 @@ bot.on('message', (msg) => {
                 }
                 if (perintah == '/startpoll'+config.bot_username) {
                     bot.sendMessage(msg.chat.id,"Poller monitoring dijalankan!")
-                    // let a=1
+                    let a=1
                     setInterval(function(){
-                        // console.log('Polling'+a)
+                        console.log('Polling'+a)
                         for (i=0; i < config.server.length; i++){
                             let poll = new Promise ((resolve, reject)=>{
                                 request({
@@ -67,12 +67,21 @@ bot.on('message', (msg) => {
                             })
 
                             poll.then((data)=>{
+                                let diskFreePrecentage = data.disk2.free / data.disk2.total * 100
+                                let diskUsage = 100 - diskFreePrecentage
                                 if (data.cpu_usage2 > cpu_thershold) {
                                    bot.sendMessage(msg.chat.id, '\u26A0 WARNING!! \u26A0 \n Penggunaan CPU server '+data.srv_name+ ' lebih dari '+thershold+'% \n Penggunaan saat ini : '+data.cpu_usage,{parse_mode: "HTML"})
                                 }
+
+                                if (diskFreePrecentage < 50) {
+                                    bot.sendMessage(msg.chat.id, '\u26A0 WARNING!! \u26A0 \n Penggunaan Harddisk server '+data.srv_name+' sudah mecapai '+diskUsage.toFixed(2)+'% \n - Harddisk total : '+data.disk.total+'\n - Hardisk free : '+data.disk.free)
+                                }
+                                console.log('cpu : '+data.cpu_usage2)
+                                console.log('diskFree :'+diskFreePrecentage+'%')
+                                console.log('diskUsage : '+diskUsage+'%')
                             })
                         }
-                        // a++
+                        a++
                     }, interval_in_ms)
                 }
             }
